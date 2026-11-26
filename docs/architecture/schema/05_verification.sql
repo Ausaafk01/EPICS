@@ -1,7 +1,4 @@
--- ============================================================================
--- GRAM VIKAS: Civic Intelligence & Rural Governance Platform
--- Schema Module 05: Development Verification & Civic Audit
--- ============================================================================
+-- Development verifications and social audits
 
 CREATE TABLE IF NOT EXISTS development_verifications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -36,6 +33,5 @@ CREATE TABLE IF NOT EXISTS development_verifications (
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Indexes
 CREATE INDEX IF NOT EXISTS idx_verifications_project ON development_verifications(project_id);
 CREATE INDEX IF NOT EXISTS idx_verifications_panchayat_variance ON development_verifications(panchayat_id, audit_variance_flag);

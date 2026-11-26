@@ -1,7 +1,4 @@
--- ============================================================================
--- GRAM VIKAS: Civic Intelligence & Rural Governance Platform
--- Schema Module 02: Grievance Redressal
--- ============================================================================
+-- Grievance tickets and lifecycle history
 
 CREATE TABLE IF NOT EXISTS grievance_tickets (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -61,7 +58,6 @@ CREATE TABLE IF NOT EXISTS grievance_status_history (
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Indexes
 CREATE INDEX IF NOT EXISTS idx_grievances_panchayat_status ON grievance_tickets(panchayat_id, status);
 CREATE INDEX IF NOT EXISTS idx_grievances_ward_status ON grievance_tickets(ward_id, status);
 CREATE INDEX IF NOT EXISTS idx_grievances_complainant ON grievance_tickets(complainant_user_id);

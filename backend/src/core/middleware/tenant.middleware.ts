@@ -31,8 +31,15 @@ export const tenantMiddleware = (req: Request, res: Response, next: NextFunction
 
   // Initial context establishment
   RequestContextManager.run({ correlationId, user }, () => {
-    // If route is public, health check, or authentication onboarding, X-Panchayat-ID is optional
-    if (req.path.startsWith('/health') || req.path.startsWith('/api/v1/auth')) {
+    // Check if route is an unauthenticated public route
+    const isPublicRoute =
+      req.path.startsWith('/health') ||
+      req.path.startsWith('/api/v1/auth') ||
+      req.path.startsWith('/api/v1/assisted/track') ||
+      (req.path.startsWith('/api/v1/schemes') && req.method === 'GET' && !req.path.includes('/applications')) ||
+      (req.path.match(/^\/api\/v1\/schemes\/[^/]+\/check-eligibility$/) !== null);
+
+    if (isPublicRoute && !headerPanchayatId) {
       return next();
     }
 

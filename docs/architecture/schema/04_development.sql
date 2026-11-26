@@ -1,7 +1,4 @@
--- ============================================================================
--- GRAM VIKAS: Civic Intelligence & Rural Governance Platform
--- Schema Module 04: Development & Expenditure Tracking
--- ============================================================================
+-- Development projects, physical milestones, and expenditure vouchers
 
 CREATE TABLE IF NOT EXISTS development_projects (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -87,7 +84,6 @@ CREATE TABLE IF NOT EXISTS expenditure_vouchers (
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Indexes
 CREATE INDEX IF NOT EXISTS idx_projects_panchayat_status ON development_projects(panchayat_id, status);
 CREATE INDEX IF NOT EXISTS idx_projects_funding ON development_projects(panchayat_id, funding_source);
 CREATE INDEX IF NOT EXISTS idx_milestones_project ON project_milestones(project_id);

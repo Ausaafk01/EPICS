@@ -13,6 +13,8 @@ import { developmentRoutes } from './modules/development/development.routes';
 import { verificationRoutes } from './modules/verification/verification.routes';
 import { registerDevelopmentSubscribers } from './modules/development/development.subscriber';
 import { authRoutes } from './modules/auth/auth.routes';
+import { schemeRoutes } from './modules/scheme/scheme.routes';
+import { assistedAccessRoutes } from './modules/assisted-access/assisted-access.routes';
 
 // Register cross-module domain event subscribers
 registerGrievanceSubscribers();
@@ -21,13 +23,13 @@ registerDevelopmentSubscribers();
 export const createApp = (): Application => {
   const app = express();
 
-  // Security & utility middleware
+  // Middleware
   app.use(helmet());
   app.use(cors());
   app.use(express.json());
   app.use(requestLogger);
 
-  // Health check routes (public, bypassed from X-Panchayat-ID enforcement)
+  // Health checks
   app.get('/health', (req: Request, res: Response) => {
     res.status(200).json({
       status: 'ok',
@@ -53,10 +55,9 @@ export const createApp = (): Application => {
     }
   });
 
-  // Apply Multi-Tenant Context Middleware to all downstream routes
+  // Multi-tenant context
   app.use(tenantMiddleware);
 
-  // Demo / Tenant verification route
   app.get('/api/v1/tenant-echo', (req: Request, res: Response) => {
     res.status(200).json({
       success: true,
@@ -67,19 +68,19 @@ export const createApp = (): Application => {
     });
   });
 
-  // Business Modules
+  // Feature routes
   app.use('/api/v1/auth', authRoutes);
+  app.use('/api/v1/schemes', schemeRoutes);
+  app.use('/api/v1/assisted', assistedAccessRoutes);
   app.use('/api/v1/grievances', grievanceRoutes);
   app.use('/api/v1/infrastructure', infrastructureRoutes);
   app.use('/api/v1/projects', developmentRoutes);
   app.use('/api/v1/verification', verificationRoutes);
 
-  // 404 Handler for undefined routes
   app.use((req: Request, res: Response, next) => {
     next(new NotFoundError(`Route '${req.method} ${req.path}' not found.`));
   });
 
-  // Centralized RFC-7807 Error Handler
   app.use(errorHandler);
 
   return app;

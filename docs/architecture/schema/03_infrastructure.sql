@@ -1,7 +1,4 @@
--- ============================================================================
--- GRAM VIKAS: Civic Intelligence & Rural Governance Platform
--- Schema Module 03: Infrastructure & Water Asset Monitoring
--- ============================================================================
+-- Village physical assets and repair maintenance logs
 
 CREATE TABLE IF NOT EXISTS village_assets (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -57,7 +54,6 @@ CREATE TABLE IF NOT EXISTS asset_maintenance_events (
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Indexes
 CREATE INDEX IF NOT EXISTS idx_assets_panchayat_cat ON village_assets(panchayat_id, asset_category);
 CREATE INDEX IF NOT EXISTS idx_assets_health ON village_assets(panchayat_id, health_status);
 CREATE INDEX IF NOT EXISTS idx_asset_maint_asset ON asset_maintenance_events(asset_id);

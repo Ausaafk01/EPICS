@@ -5,10 +5,8 @@ import { logger } from '../src/core/utils/logger';
 
 async function runSeed() {
   const seedsDir = path.resolve(__dirname, '../../docs/architecture/seeds');
-  logger.info(`Starting database seeding from: ${seedsDir}`);
-
   if (!fs.existsSync(seedsDir)) {
-    logger.error(`Seeds directory does not exist at: ${seedsDir}`);
+    logger.error(`Seeds folder missing at: ${seedsDir}`);
     process.exit(1);
   }
 
@@ -22,27 +20,20 @@ async function runSeed() {
     process.exit(1);
   }
 
-  logger.info(`Found ${sqlFiles.length} seed file(s) to execute in sequence:`, { files: sqlFiles });
-
   const pool = getPool();
   const client = await pool.connect();
 
   try {
-    logger.info('Acquired client connection. Executing seed scripts within transaction...');
     await client.query('BEGIN');
-
     for (const file of sqlFiles) {
-      const filePath = path.join(seedsDir, file);
-      logger.info(`Executing seed file: ${file}`);
-      const sql = fs.readFileSync(filePath, 'utf8');
+      const sql = fs.readFileSync(path.join(seedsDir, file), 'utf8');
       await client.query(sql);
     }
-
     await client.query('COMMIT');
-    logger.info('Database seeding completed successfully! Master jurisdiction data populated.');
+    logger.info(`Applied ${sqlFiles.length} seed file(s) successfully.`);
   } catch (err) {
     await client.query('ROLLBACK');
-    logger.error('Database seeding failed! Rolled back changes.', { error: (err as Error).message });
+    logger.error('Database seeding failed, rolled back transaction.', { error: (err as Error).message });
     process.exit(1);
   } finally {
     client.release();
@@ -51,6 +42,6 @@ async function runSeed() {
 }
 
 runSeed().catch((err) => {
-  console.error('Unhandled seeding error:', err);
+  console.error('Seed error:', err);
   process.exit(1);
 });

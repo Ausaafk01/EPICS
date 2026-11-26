@@ -1,12 +1,7 @@
--- ============================================================================
--- GRAM VIKAS: Civic Intelligence & Rural Governance Platform
--- Schema Module 01: Core Administrative Jurisdiction & Identity
--- ============================================================================
+-- Core jurisdiction, tenancy, users, and audit logs
 
--- Enable pgcrypto for UUID and cryptographic functions
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- 1.1 Districts
 CREATE TABLE IF NOT EXISTS districts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     code VARCHAR(20) NOT NULL UNIQUE,
@@ -16,7 +11,6 @@ CREATE TABLE IF NOT EXISTS districts (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- 1.2 Blocks
 CREATE TABLE IF NOT EXISTS blocks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     district_id UUID NOT NULL REFERENCES districts(id) ON DELETE CASCADE,
@@ -26,7 +20,7 @@ CREATE TABLE IF NOT EXISTS blocks (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- 1.3 Panchayats (Tenant Boundary Root)
+-- Root tenant boundary
 CREATE TABLE IF NOT EXISTS panchayats (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     district_id UUID REFERENCES districts(id) ON DELETE RESTRICT,
@@ -42,7 +36,6 @@ CREATE TABLE IF NOT EXISTS panchayats (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- 1.4 Wards (Electoral / Neighborhood Subdivisions)
 CREATE TABLE IF NOT EXISTS wards (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     panchayat_id UUID NOT NULL REFERENCES panchayats(id) ON DELETE CASCADE,
@@ -54,7 +47,6 @@ CREATE TABLE IF NOT EXISTS wards (
     CONSTRAINT uq_ward_panchayat_number UNIQUE (panchayat_id, ward_number)
 );
 
--- 1.5 Users (Citizens, Local Representatives, Administrative Officers)
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     mobile_number VARCHAR(15) NOT NULL UNIQUE,
@@ -83,7 +75,6 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Optional circular foreign key constraint on wards
 DO $$
 BEGIN
     IF NOT EXISTS (
@@ -95,7 +86,6 @@ BEGIN
     END IF;
 END $$;
 
--- 1.6 Immutable Audit Logs
 CREATE TABLE IF NOT EXISTS audit_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     actor_id UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -110,7 +100,6 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- 1.7 Indexes for Performance & Tenant Partitioning
 CREATE INDEX IF NOT EXISTS idx_districts_code ON districts(code);
 CREATE INDEX IF NOT EXISTS idx_blocks_district_id ON blocks(district_id);
 CREATE INDEX IF NOT EXISTS idx_panchayats_code ON panchayats(code);
